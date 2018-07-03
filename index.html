@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <base target="_top">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
+<script
+  src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+  integrity="sha256-3edrmyuQ0w65f8gfBsqowzjJe2iM6n0nKciPUp8y+7E="
+  crossorigin="anonymous"></script>
+</head>
+
+<body>
+               <!--div class="form-group">
+                <label for="name">Nimi</label>
+                <input type="text" class="form-control" name="name">
+            </div>
+            <div class="form-group">
+                <label for="name">Sähköposti</label>
+                <input type="email" class="form-control" name="email">
+            </div-->
+            
+    <div class="replaceOnSuccess" style="max-width: 340px;">
+        <form id="saunaForm">
+            
+            <fieldset class="form-group">
+              <div class="row">
+                <legend for="vuorot" class="col-form-label col-sm-4 pt-0">Kierros</legend>
+                <div class="result col-sm-8"></div>
+
+                </div>
+            </fieldset>
+            
+                <div class="form-group">
+            </div>
+        </form>
+        
+        <div class="saunaFormSend"></div>
+    </div>
+    
+    
+
+<script>
+
+
+// my little html string builder
+buildHTML = function(tag, html, attrs) {
+  // you can skip html param
+  if (typeof(html) != 'string') {
+    attrs = html;
+    html = null;
+  }
+  var h = '<' + tag;
+  for (attr in attrs) {
+    if(attrs[attr] === false) continue;
+    h += ' ' + attr + '="' + attrs[attr] + '"';
+  }
+  return h += html ? ">" + html + "</" + tag + ">" : "/>";
+}
+
+
+
+
+
+function getVuoroHTML(vuorot) {
+/*
+  var result = "";
+  for (var i in vuorot.vuoro) {
+    var vuoro = vuorot.vuoro[i];
+    result += "'<input type="radio" id="vuoro' + i + 'value="text"> <label for="contactChoice' + i + '">Vuoro ' + i + ' ' + vuoro.begin' +  '</label>';
+  }*/
+  var result = "";
+  //var i = 1;
+  var i;
+  for(i = 0; i < vuorot.length; i++) {
+     vuoro = vuorot[i];
+     html = "<div class=\"form-check\">";
+     //var vapaana = (vuorot[i-1].max - vuorot[i-1].reservations);
+     var isDisabled = "";
+     /*
+     if(vapaana == 0){
+         isDisabled = "disabled";
+     }*/
+     /*
+     html +=
+         buildHTML("input class=\"form-check-input\"" + isDisabled, {
+         id: i,
+         name: "vuoro",
+         type: "radio",
+         checked: false
+      });*/
+      
+           //html += '<label class="form-check-label" for="contactChoice' + i + '">Vuoro ' + i + ' Kesto: ' + vuorot[i-1].begin + '-' + vuorot[i-1].end + ' Paikkoja vapaana: ' + (vuorot[i-1].max - vuorot[i-1].reservations) + '</label>';
+      html += '<label class="form-check-label" for="contactChoice' + i + '"> ' + vuoro.begin + '</label>';
+      html += '</div>';
+      
+      result += html;
+  }
+  
+  return result; //vuorot[0].begin;
+}
+
+</script>
+
+
+
+
+<script>
+  function getVuorot() {
+    google.script.run.withSuccessHandler(recieveVuorot).getVuorotFromSheet();
+  };
+
+  function recieveVuorot(vuorot) {
+    //Logger.log('Vuorot: ' + vuorot);
+    console.log(vuorot);
+    console.log(vuorot[0]);
+    
+    $('.result').html(getVuoroHTML(vuorot));//change JSON2 to data;
+    //$('.result').html("KRÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖL");//change JSON2 to data;
+  };
+  
+  getVuorot();
+</script>
+
+    <script>
+    /*
+        //google.script.run.withSuccessHandler(gotVuorot).getVuorot();
+        function getRadioVal(form, name) {
+    var val;
+    // get list of radio buttons with specified name
+    var radios = form.elements[name];
+    
+    // loop through list of radio buttons
+    for (var i=0, len=radios.length; i<len; i++) {
+        if ( radios[i].checked ) { // radio checked?
+            val = radios[i].id; // if so, hold its value in val
+            break; // and break out of for loop
+        }
+    }
+    return val; // return value of checked radio or undefined if none checked
+}
+*/
+        const myForm = document.querySelector('#saunaForm');
+        console.log(myForm);
+        myForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            //console.log(getRadioVal(myForm, 'vuoro'));
+            
+            var checkedVuoro = document.querySelector('#myform input[type="radio"]:checked');
+            
+            let myData = {
+                'name': this.querySelector('input[name="name"]').value,
+                'email': this.querySelector('input[name="email"]').value,
+                'vuoro': this.querySelector('input[name=vuoro]:checked').id, //.attr('id'),
+                'people' : this.querySelector(".replaceOnSuccess select").value
+                //'vuoro': getRadioVal(myForm, 'vuoro')//this.querySelector('input[name=vuoro]:checked')//.attr('id'),
+                //'vuoro':$("input[name=rate]:checked").val()
+            };
+            google.script.run.withSuccessHandler(onSuccess).addReservation(myData);
+
+            console.dir(myData);
+
+        });
+
+        function onSuccess(data) {
+           console.log("HERE " );
+           $('.replaceOnSuccess').replaceWith("<div>" + data + "</div>");
+        /*
+            $('.replaceOnSuccess').html("Olet varannut vuoron nimellä " + data.name + ". Vuoro alkaa klo " + data.begin + " ja loppuu klo " + data.end  
+            + ". <br><br> Lunasta varaamasi laudepaikka Kahvila Lähteeltä viimeistään tunti ennen varattua aikaa. Kahvila Lähde on auki arkisin kello 11-16, juhannusaattona kello 12-18. Osoite Lapinlahdenpolku 8. <a href=\"http://lapinlahdenlahde.fi/fi/kahvila-lahde/\">http://lapinlahdenlahde.fi/fi/kahvila-lahde/</a>");//change JSON2 to data;
+           */
+           console.log(data);
+        }
+
+        function gotVuorot() {
+
+        }
+    </script>
+</body>
+
+</html>
