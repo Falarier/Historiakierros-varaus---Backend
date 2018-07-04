@@ -60,15 +60,30 @@ function getVuorotFromSheet(){
     
     var varaajat = [];
     for(var iVaraaja = 0, lVaraaja = varaajaRows.length; iVaraaja < lVaraaja; iVaraaja++){
+      var vuoro = {};
+      
+      vuoro['id'] = dataRow[VuorotEnum.ID];
+      vuoro['begin'] = getFormattedTime(dataRow[VuorotEnum.DATE]);
+      vuoro['reservations'] = dataRow[VuorotEnum.RESERVATIONS];
+      
+      var varaajatInVuoro = [];
+      
       var varaajaRow = varaajaRows[iVaraaja];
       var varaajanVuoroID = varaajaRow[VaraajatEnum.VUOROID];
+      
       if(vuoroID == varaajanVuoroID){
-        varaajat.push();
-        
+        var varaaja = {};
+        varaaja['name'] = varaajaRow[VaraajatEnum.NAME];
+        varaaja['email'] = varaajaRow[VaraajatEnum.EMAIL];
+        varaaja['vuoroID'] = varaajaRow[VaraajatEnum.VUOROID];
+        varaaja['reservations'] = varaajaRow[VaraajatEnum.RESERVATIONS];
+        varaajatInVuoro.push(varaaja);
       }
+      
+      dataArray.push(varaajatInVuoro);
     }
     
-    dataArray.push(record);
+    
   }
   
   return dataArray;
