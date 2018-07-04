@@ -1,7 +1,6 @@
 var moment = Moment.moment;
 
 var VuorotEnum = { ID: 0, DATE: 1, RESERVATIONS: 2};
-var VaraajatEnum = { NAME: 0, EMAIL: 1, VUOROID: 2, RESERVATIONS: 3};
 
 moment.locale('fi-FI');
 
@@ -42,48 +41,17 @@ function getVuorotFromSheet(){
   var dataArray = [];
   var rows = sheet.getRange(2, 1, sheet.getLastRow() - 1, sheet.getLastColumn()).getValues();
   
-  sheet = ss.getSheetByName('Varaajat');
-  var varaajaRows = sheet.getRange(2, 1, sheet.getLastRow() - 1, sheet.getLastColumn()).getValues();
-  
-  // go through all vuorot
   for(var i = 0, l = rows.length; i < l; i++){
     var dataRow = rows[i];
     var record = {};
-    vuoroID = dataRow[VuorotEnum.ID];
-    record['id'] = dataRow[VuorotEnum.ID];
+    record['id'] = dataRow[0];
     
-    record['begin'] = getFormattedTime(dataRow[VuorotEnum.DATE]);
+    record['begin'] = getFormattedTime(dataRow[1]);
     //record['end'] = moment(dataRow[2]).format("H:mm");
-    record['reservations'] = dataRow[VuorotEnum.RESERVATIONS];
+    record['reservations'] = dataRow[2];
     //record['max'] = dataRow[4];
     
-    
-    var varaajat = [];
-    for(var iVaraaja = 0, lVaraaja = varaajaRows.length; iVaraaja < lVaraaja; iVaraaja++){
-      var vuoro = {};
-      
-      vuoro['id'] = dataRow[VuorotEnum.ID];
-      vuoro['begin'] = getFormattedTime(dataRow[VuorotEnum.DATE]);
-      vuoro['reservations'] = dataRow[VuorotEnum.RESERVATIONS];
-      
-      var varaajatInVuoro = [];
-      
-      var varaajaRow = varaajaRows[iVaraaja];
-      var varaajanVuoroID = varaajaRow[VaraajatEnum.VUOROID];
-      
-      if(vuoroID == varaajanVuoroID){
-        var varaaja = {};
-        varaaja['name'] = varaajaRow[VaraajatEnum.NAME];
-        varaaja['email'] = varaajaRow[VaraajatEnum.EMAIL];
-        varaaja['vuoroID'] = varaajaRow[VaraajatEnum.VUOROID];
-        varaaja['reservations'] = varaajaRow[VaraajatEnum.RESERVATIONS];
-        varaajatInVuoro.push(varaaja);
-      }
-      
-      dataArray.push(varaajatInVuoro);
-    }
-    
-    
+    dataArray.push(record);
   }
   
   return dataArray;
